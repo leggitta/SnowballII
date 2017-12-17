@@ -1,5 +1,8 @@
 # Snowball II
-Inspired by my dungeons and dragson campaign
+Inspired by my dungeons and dragons campaign
+
+Also inspired by this tutorial ...  
+https://mozdevs.github.io/html5-games-workshop/
 
 ## To play
 
