@@ -1,3 +1,6 @@
+var W = 480
+var H = 320
+
 function Hero(game, x, y) {
     // call Phaser.Sprite constructor
     Phaser.Sprite.call(this, game, x, y, 'hero');
@@ -38,14 +41,18 @@ PlayState.init = function() {
 };
 
 PlayState.create = function() {
-    this.game.world.setBounds(-150+16, -150+16, 900-32, 900-32);
+    this.game.world.setBounds(-W/2+16, -H/2, 640+W-32, 640+H-32);
     this.game.add.image(0, 0, 'background')
+    this.game.add.image(W/2-16, H/2, 'move')
+    this.game.add.image(W/2-48, H/2, 'move')
+    this.game.add.image(W/2+16, H/2, 'move')
     this._spawnCharacters();
 };
 
 // load game assets here
 PlayState.preload = function() {
     this.game.load.image('background', 'images/background.png');
+    this.game.load.image('move', 'images/move.png');
     this.game.load.spritesheet('hero', 'images/hero.png', 32, 32);
 };
 
@@ -53,7 +60,7 @@ PlayState._spawnCharacters = function () {
     // spawn hero
     this.hero = new Hero(this.game, 0, 0);
     this.hero.fixedToCamera = true;
-    this.hero.cameraOffset.setTo(150, 150);
+    this.hero.cameraOffset.setTo(W/2, H/2+16);
     this.game.add.existing(this.hero);
 };
 
@@ -97,11 +104,10 @@ PlayState._handleInput = function() {
 };
 
 function render() {
-    this.game.debug.cameraInfo(this.game.camera, 32, 32);
 };
 
 window.onload = function () {
-    let game = new Phaser.Game(300, 300, Phaser.AUTO, 'game');
+    let game = new Phaser.Game(W, H, Phaser.AUTO, 'game');
     game.state.add('play', PlayState);
     game.state.start('play');
 };
