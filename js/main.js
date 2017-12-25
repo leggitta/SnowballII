@@ -1,113 +1,64 @@
-var W = 480
-var H = 320
-
-function Hero(game, x, y) {
-    // call Phaser.Sprite constructor
-    Phaser.Sprite.call(this, game, x, y, 'hero');
-    this.anchor.set(0.5, 0.5);
-    this.game.physics.enable(this);
-    this.body.collideWorldBounds = true;
-    this.animations.add('walk', [0, 1], 8, false);
-    this.animations.add('attack', [2, 3, 2], 8, false);
-}
-
-// inherit from Phaser.Sprite
-Hero.prototype = Object.create(Phaser.Sprite.prototype);
-Hero.prototype.constructor = Hero;
-Hero.prototype.isMoving = false;
-Hero.prototype.attack = function () {
-    this.animations.play('attack');
-};
-
-Hero.prototype.update = function() {
-    if (this.isMoving) {
-        this.animations.play('walk');
-    }
-}
+var grid_width = 64;
+var grid_height = 64;
+var screen_width = 25*grid_width;
+var screen_height = 21*grid_width;
+var map_width = 2560;
+var map_height = 2560;
 
 PlayState = {};
 PlayState.init = function() {
     this.game.renderer.renderSession.roundPixels = true;
-    this.keys = this.game.input.keyboard.addKeys({
-        left: Phaser.KeyCode.LEFT,
-        right: Phaser.KeyCode.RIGHT,
-        up: Phaser.KeyCode.UP,
-        down: Phaser.KeyCode.DOWN,
-        enter: Phaser.KeyCode.SPACEBAR
-    });
-    this.keys.enter.onDown.add(function() {
-        this.hero.attack();
-    }, this);
-};
-
+}
 PlayState.create = function() {
-    this.game.world.setBounds(-W/2+16, -H/2, 640+W-32, 640+H-32);
-    this.game.add.image(0, 0, 'background')
-    this.game.add.image(W/2-16, H/2, 'move')
-    this.game.add.image(W/2-48, H/2, 'move')
-    this.game.add.image(W/2+16, H/2, 'move')
-    this._spawnCharacters();
-};
+    this.game.input.mouse.capture = true;
+    this.game.world.setBounds(0, 0, map_width, map_height);
 
-// load game assets here
+    // background image
+    this.game.add.image(0, 0, 'background');
+
+    // move square
+    this.move = this.game.add.sprite(0, 0, 'move');
+    this.move.anchor.set(0.5, 0.5)
+    this.move.fixedToCamera = true;
+    this.move.cameraOffset.setTo(screen_width/2, screen_height/2);
+
+    // pointer
+    this.pointer = this.game.add.sprite(0, 0, 'pointer');
+}
 PlayState.preload = function() {
     this.game.load.image('background', 'images/background.png');
     this.game.load.image('move', 'images/move.png');
-    this.game.load.spritesheet('hero', 'images/hero.png', 32, 32);
-};
-
-PlayState._spawnCharacters = function () {
-    // spawn hero
-    this.hero = new Hero(this.game, 0, 0);
-    this.hero.fixedToCamera = true;
-    this.hero.cameraOffset.setTo(W/2, H/2+16);
-    this.game.add.existing(this.hero);
-};
-
+    this.game.load.image('pointer', 'images/pointer.png');
+}
 PlayState.update = function() {
-    this._handleCollisions();
-    this._handleInput();
-};
+    var x = this.game.input.mousePointer.x;
+    var y = this.game.input.mousePointer.y;
+    var grid_x = Math.floor(x / grid_width);
+    var grid_y = Math.floor(y / grid_height);
 
-PlayState._handleCollisions = function() {
-};
+    if (this.game.input.activePointer.leftButton.isDown) {
+    }
 
-PlayState._handleInput = function() {
-    if (this.keys.left.isDown) {
-        //this.hero.move(-1, 0);
-        this.game.camera.x -= 4;
-        this.hero.angle = 270;
-        this.hero.isMoving = true;
-    }
-    else if (this.keys.right.isDown) {
-        //this.hero.move(1, 0);
-        this.game.camera.x += 4;
-        this.hero.angle = 90;
-        this.hero.isMoving = true;
-    }
-    else if (this.keys.up.isDown) {
-        //this.hero.move(0, -1);
-        this.game.camera.y -= 4;
-        this.hero.angle = 0;
-        this.hero.isMoving = true;
-    }
-    else if (this.keys.down.isDown) {
-        //this.hero.move(0, 1);
-        this.game.camera.y += 4;
-        this.hero.angle = 180;
-        this.hero.isMoving = true;
-    }
-    else {
-        //this.hero.move(0, 0)
-        this.hero.isMoving = false;
-    }
-};
+    this.game.debug.text(
+        'Left: ' + this.game.input.activePointer.leftButton.isDown,
+        10, 20
+    );
+    this.game.debug.text(
+        'Right: ' + this.game.input.activePointer.rightButton.isDown,
+        10, 40
+    );
+    this.game.debug.text(
+        'X: ' + grid_x.toFixed(0) + ' Y: ' + grid_y.toFixed(0),
+        10, 60
+    );
+    this.pointer.x = grid_x * grid_width;
+    this.pointer.y = grid_y * grid_height;
+}
 
-function render() {
-};
-
-window.onload = function () {
-    let game = new Phaser.Game(W, H, Phaser.AUTO, 'game');
+window.onload = function() {
+    let game = new Phaser.Game(
+        screen_width, screen_height, Phaser.AUTO, 'game'
+    );
     game.state.add('play', PlayState);
     game.state.start('play');
 };
